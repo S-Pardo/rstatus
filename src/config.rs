@@ -1,5 +1,7 @@
 use crate::feature::Generic;
 
+pub const DELIMITER: &'static str = " | ";
+
 pub fn get_scripts() -> Vec<Generic> {
     let scripts = scripts();
     let mut features: Vec<Generic> = Vec::new();
@@ -11,7 +13,9 @@ pub fn get_scripts() -> Vec<Generic> {
 
 fn scripts() -> Vec<&'static str> {
     vec![
+        "volume",
         "cpu",
-        "weather"
+        "battery",
+        "clock",
     ]
 }
