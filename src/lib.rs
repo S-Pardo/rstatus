@@ -6,6 +6,7 @@ mod xset;
 mod config;
 
 pub fn run() {
+    signal_wrapper(44, interrupt);
     loop {
         println!("{}", get_outputs(config::get_scripts()));
         xset::XWindow::init().unwrap().render(get_outputs(config::get_scripts()));
@@ -20,4 +21,19 @@ fn get_outputs(features: Vec<Generic>) -> String {
     }
     data.truncate(data.len()-config::DELIMITER.len());
     data
+}
+
+fn interrupt(_: u8) {
+    println!("interrupted");
+    xset::XWindow::init().unwrap().render(get_outputs(config::get_scripts()));
+}
+
+fn signal_wrapper(sig: u8, handler: fn(u8)) -> fn(u8) {
+    unsafe {
+        signal(sig, handler)
+    }
+}
+
+extern "C" {
+    fn signal(sig: u8, handler: fn(u8)) -> fn(u8);
 }
