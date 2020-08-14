@@ -10,4 +10,4 @@ edition = "2018"
 
 [dependencies.x11]
 version = "2.18.2"
-features = ["xlib"]
+FEATURES = ["xlib"]
