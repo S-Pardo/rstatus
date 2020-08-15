@@ -23,8 +23,7 @@ impl Feature {
 
     pub fn update(&mut self) {
         let output = self.command.output().unwrap();
-        let mut data = String::from_utf8(output.stdout).unwrap();
-        self.data = data.trim().to_string();
+        self.data = String::from_utf8(output.stdout).unwrap().trim().to_string();
     }
 
 }
