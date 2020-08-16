@@ -1,4 +1,5 @@
 #![feature(duration_zero)]
+#![allow(unused_must_use)]
 
 use crate::feature::Feature;
 use std::sync::mpsc::{Sender, channel};
@@ -7,6 +8,7 @@ use std::time::Duration;
 use std::thread::JoinHandle;
 use std::process::Command;
 use std::io::Read;
+use notify::{watcher, Watcher, RecursiveMode};
 
 mod feature;
 mod config;
@@ -21,12 +23,25 @@ pub fn run() {
             timers.push(create_timer(feature.id as i32, feature.sender.clone(), feature.time));
         }
     }
-    listen_audio(0, sender.clone());
     while let Ok(message) = receiver.recv() {
         match message {
             _ => update_features(message, &mut features),
         }
     }
+}
+
+fn listen_brigthness(id: u32, sender: Sender<i32>) {
+    thread::spawn(move || {
+        let (tx, rx) = channel();
+        let mut watcher = watcher(tx.clone(), Duration::from_millis(300)).unwrap();
+        watcher.watch("/sys/class/backlight/intel_backlight/brightness", RecursiveMode::NonRecursive);
+
+        loop {
+            while let Ok(_) = rx.recv() {
+                sender.send(id as i32);
+            }
+        };
+    });
 }
 
 fn listen_audio(id: u32, sender: Sender<i32>) {
@@ -42,7 +57,7 @@ fn listen_audio(id: u32, sender: Sender<i32>) {
             if let Ok(_) = monitor.read(&mut buffer) {
                 sender.send(id as i32);
             }
-            thread::sleep(Duration::from_millis(100));
+            thread::sleep(Duration::from_millis(110));
         };
     });
 }
@@ -84,6 +99,12 @@ fn initialize_features(config: Vec<(&str, i32)>, sender: &Sender<i32>) -> Vec<Fe
         let feature = *feature;
         let mut aux = Feature::new(i as u32, feature.0, Duration::from_secs(feature.1 as u64), sender.clone());
         aux.update();
+        if aux.name == "volume" {
+            listen_audio(aux.id, sender.clone());
+        }
+        if aux.name == "xbacklight" {
+            listen_brigthness(aux.id, sender.clone());
+        }
         features.push(aux);
     }
     features
