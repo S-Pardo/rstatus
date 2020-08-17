@@ -33,7 +33,7 @@ pub fn run() {
 fn listen_brigthness(id: u32, sender: Sender<i32>) {
     thread::spawn(move || {
         let (tx, rx) = channel();
-        let mut watcher = watcher(tx.clone(), Duration::from_millis(300)).unwrap();
+        let mut watcher = watcher(tx.clone(), Duration::from_millis(100)).unwrap();
         watcher.watch("/sys/class/backlight/intel_backlight/brightness", RecursiveMode::NonRecursive);
 
         loop {
