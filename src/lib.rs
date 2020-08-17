@@ -102,7 +102,7 @@ fn initialize_features(config: Vec<(&str, i32)>, sender: &Sender<i32>) -> Vec<Fe
         if aux.name == "volume" {
             listen_audio(aux.id, sender.clone());
         }
-        if aux.name == "xbacklight" {
+        if aux.name == "brightness" {
             listen_brigthness(aux.id, sender.clone());
         }
         features.push(aux);
